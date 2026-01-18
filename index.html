@@ -537,7 +537,13 @@
 
         <div class="panel" style="margin-top: 20px;">
             <p style="font-size: 1.1rem;">Debate iniciado.<br>Identifiquen al infiltrado.</p>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
                 <button class="btn btn-pink" onclick="App.startVoting()">INICIAR VOTACIÓN</button>
+                <button class="btn" onclick="App.openGuessPhase()" 
+                    style="font-size: 0.9rem; border-color: var(--sq-gold); color: var(--sq-gold); margin-top: 0;">
+                    EL IMPOSTOR ADIVINA
+                </button>
+            </div>
         </div>
     </div>
 
@@ -552,39 +558,85 @@
         </div>
 
         <div id="screen-vote-summary" class="screen">
-            <h2>RESUMEN DE VOTOS</h2>
-            <div class="panel" style="border-color: var(--sq-pink);">
-                <div id="vote-summary-list" style="display: grid; gap: 10px; text-align: left; font-size: 0.95rem;"></div>
-                <button class="btn btn-pink" onclick="App.openGuessPhase()" style="margin-top: 20px;">CONTINUAR</button>
+            <h2>CONTABILIZANDO DATOS</h2>
+            <div class="panel" style="border-color: var(--sq-pink); max-width: 480px;">
+                <div id="vote-summary-list" style="display: grid; gap: 20px; text-align: left; margin: 10px 0;">
+                    <!-- Aquí se generarán las barras de votos -->
+                </div>
+                
+                <div id="vote-final-msg" style="margin-top: 25px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 4px; border-left: 4px solid var(--sq-pink); font-size: 0.85rem; color: #aaa;">
+                    Pulse el botón inferior para ejecutar el protocolo de revelación y asignar puntos.
+                </div>
+
+                <button class="btn btn-pink" onclick="App.revealFromVoting()" style="margin-top: 25px;">REVELAR IDENTIDAD</button>
             </div>
         </div>
+
+        <style>
+            .vote-bar-container {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
+            .vote-bar-header {
+                display: flex;
+                justify-content: space-between;
+                font-size: 0.8rem;
+                letter-spacing: 1px;
+            }
+            .vote-bar-bg {
+                height: 12px;
+                background: #222;
+                border-radius: 6px;
+                overflow: hidden;
+                border: 1px solid #333;
+            }
+            .vote-bar-fill {
+                height: 100%;
+                background: var(--sq-teal);
+                box-shadow: 0 0 10px var(--sq-teal);
+                transition: width 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+            .is-voted-out .vote-bar-fill {
+                background: var(--sq-pink);
+                box-shadow: 0 0 10px var(--sq-pink);
+            }
+        </style>
 
         <div id="screen-guess" class="screen">
-            <h2>FASE FINAL</h2>
-            <div class="panel" style="border-color: var(--sq-teal);">
-                <p style="font-size: 0.95rem; line-height: 1.5; margin-bottom: 15px;">
-                    Si el impostor cree saber la palabra civil, puede intentar adivinarla ahora.
+            <h2>FASE DE ADIVINANZA</h2>
+            <div class="panel" style="border-color: var(--sq-gold);">
+                <p id="guess-instruction" style="font-size: 0.95rem; line-height: 1.5; margin-bottom: 25px;">
+                    El impostor debe decir la palabra de los civiles en voz alta ahora.
                 </p>
-                <div class="hint-text">El impostor lo dice en voz alta. No se escribe.</div>
-                <button class="btn" onclick="App.confirmGuessIntent()">QUIERO ADIVINAR</button>
-                <div id="guessOutcome" class="hidden" style="margin-top: 12px;">
-                    <p style="font-size: 0.8rem; color: #888; letter-spacing: 1px;">RESULTADO DEL INTENTO</p>
-                    <button class="btn" onclick="App.resolveGuess(true)">ADIVINÓ</button>
-                    <button class="btn btn-pink" onclick="App.resolveGuess(false)">FALLÓ</button>
+                
+                <div id="reveal-word-section">
+                    <button class="btn" style="border-color: var(--sq-teal); color: var(--sq-teal);" 
+                        onclick="App.revealSecretWordForGuess()">REVELAR PALABRA SECRETA</button>
+                    <p style="font-size: 0.7rem; color: #666; margin-top: 15px;">Pulsa después de que el impostor hable.</p>
                 </div>
-                <button class="btn btn-pink" onclick="App.skipGuess()">NO ADIVINAR. REVELAR</button>
+
+                <div id="check-guess-section" class="hidden" style="margin-top: 10px;">
+                    <p style="font-size: 0.7rem; color: #888; letter-spacing: 1px;">PALABRA DE LOS CIVILES:</p>
+                    <h2 id="guessed-secret-word" style="color: var(--sq-teal); font-size: 2.2rem; margin: 5px 0; text-shadow: 0 0 10px var(--sq-teal);">...</h2>
+                    
+                    <div style="margin-top: 30px; border-top: 1px solid #333; padding-top: 20px;">
+                        <p style="font-size: 0.8rem; color: var(--sq-pink); margin-bottom: 15px;">¿EL IMPOSTOR ACERTÓ?</p>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn" onclick="App.resolveGuess(true)">SÍ, ADIVINÓ</button>
+                            <button class="btn btn-pink" onclick="App.resolveGuess(false)">NO, FALLÓ</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="btn-skip-guess" class="btn btn-pink" onclick="App.skipGuess()" 
+                    style="margin-top: 40px; font-size: 0.7rem; opacity: 0.6; padding: 10px;">
+                    CANCELAR / VOLVER
+                </button>
             </div>
         </div>
 
-        <div id="confirmGuessModal" class="modal-backdrop hidden">
-            <div class="modal-card">
-                <p style="font-size: 0.95rem; line-height: 1.5; margin: 0 0 15px 0;">
-                    ¿Seguro que el impostor quiere adivinar la palabra en voz alta?
-                </p>
-                <button class="btn" onclick="App.confirmGuessProceed()">SÍ, CONTINUAR</button>
-                <button class="btn btn-pink" onclick="App.confirmGuessCancel()">CANCELAR</button>
-            </div>
-        </div>
+
 
     <div id="screen-result" class="screen">
         <h1 id="res-outcome" style="font-size: 2.5rem; color: var(--sq-pink);">RESULTADO FINAL</h1>
@@ -609,7 +661,7 @@
                 </h2>
             </div>
 
-            <div style="margin-top: 20px;">
+            <div style="margin-top: 20px; display: none;">
                 <p style="font-size: 0.75rem; color: #888; letter-spacing: 1px; margin-bottom: 8px;">APLICAR PUNTAJE</p>
                 <button id="score-impostor-btn" class="btn" onclick="App.applyImpostorWin()">IMPOSTOR GANA (+2)</button>
                 <button id="score-civiles-btn" class="btn btn-pink" onclick="App.applyCivilesWin()">CIVILES GANAN (+1 C/U)</button>
@@ -896,75 +948,90 @@
 
             resolveVoting: () => {
                 const counts = {};
+                // Inicializar conteos
+                App.state.players.forEach(p => counts[p.nameKey] = 0);
+                
                 Object.values(App.state.votes).forEach(target => {
                     counts[target] = (counts[target] || 0) + 1;
                 });
-                const entries = Object.entries(counts);
-                if (entries.length === 0) {
-                    App.state.voteOutcome = 'IMPOSTOR GANA';
-                    App.state.voteOutcomeSub = 'No hubo votos registrados.';
-                    App.showVoteSummary();
-                    return;
-                }
 
                 let maxVotes = -1;
                 let winners = [];
-                entries.forEach(([key, value]) => {
+                Object.entries(counts).forEach(([key, value]) => {
                     if (value > maxVotes) {
                         maxVotes = value;
                         winners = [key];
-                    } else if (value === maxVotes) {
+                    } else if (value === maxVotes && value > 0) {
                         winners.push(key);
                     }
                 });
 
                 const impostor = App.state.players.find(p => p.type === 'impostor');
-                if (!impostor) {
-                    App.state.voteOutcome = 'RESULTADO FINAL';
-                    App.state.voteOutcomeSub = 'No se pudo determinar al impostor.';
-                    App.showVoteSummary();
-                    return;
-                }
-
-                if (winners.length > 1) {
+                
+                if (winners.length !== 1) {
+                    // Empate o ningún voto (raro con 3 jugadores)
                     App.state.voteOutcome = 'IMPOSTOR GANA';
-                    App.state.voteOutcomeSub = 'Empate en la votación.';
-                    App.showVoteSummary();
-                    return;
-                }
-
-                const eliminatedKey = winners[0];
-                if (eliminatedKey === impostor.nameKey) {
-                    App.state.voteOutcome = 'CIVILES GANAN';
-                    App.state.voteOutcomeSub = 'Expulsaron al impostor.';
+                    App.state.voteOutcomeSub = winners.length > 1 ? 'Empate en la votación.' : 'No hubo consenso.';
+                    App.state.votedOutKey = null;
                 } else {
-                    App.state.voteOutcome = 'IMPOSTOR GANA';
-                    App.state.voteOutcomeSub = 'Expulsaron a un civil.';
+                    const eliminatedKey = winners[0];
+                    App.state.votedOutKey = eliminatedKey;
+                    if (eliminatedKey === impostor.nameKey) {
+                        App.state.voteOutcome = 'CIVILES GANAN';
+                        App.state.voteOutcomeSub = '¡Expulsaron al impostor!';
+                    } else {
+                        App.state.voteOutcome = 'IMPOSTOR GANA';
+                        App.state.voteOutcomeSub = 'Expulsaron a un inocente.';
+                    }
                 }
-                App.showVoteSummary();
+                App.showVoteSummary(counts);
             },
 
-            showVoteSummary: () => {
+            showVoteSummary: (counts) => {
                 const list = document.getElementById('vote-summary-list');
                 if (list) {
                     list.innerHTML = '';
                     App.state.players.forEach(p => {
-                        const voted = App.state.votes[p.nameKey];
-                        const target = App.state.players.find(t => t.nameKey === voted);
-                        const line = document.createElement('div');
-                        line.innerText = `${p.nameLabel} → ${target ? target.nameLabel : 'SIN VOTO'}`;
-                        list.appendChild(line);
+                        const voteCount = counts[p.nameKey] || 0;
+                        const percentage = (voteCount / 3) * 100;
+                        const isEliminated = p.nameKey === App.state.votedOutKey;
+
+                        const barHtml = `
+                            <div class="vote-bar-container ${isEliminated ? 'is-voted-out' : ''}">
+                                <div class="vote-bar-header">
+                                    <span>${p.nameLabel}</span>
+                                    <span>${voteCount} VOTOS</span>
+                                </div>
+                                <div class="vote-bar-bg">
+                                    <div class="vote-bar-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        `;
+                        const div = document.createElement('div');
+                        div.innerHTML = barHtml;
+                        list.appendChild(div);
+
+                        // Trigger animation
+                        setTimeout(() => {
+                            const fill = div.querySelector('.vote-bar-fill');
+                            if (fill) fill.style.width = percentage + '%';
+                        }, 100);
                     });
-                    const sep = document.createElement('div');
-                    sep.style.marginTop = '10px';
-                    sep.style.color = '#777';
-                    sep.style.fontSize = '0.8rem';
-                    sep.innerText = `${App.state.voteOutcome} · ${App.state.voteOutcomeSub}`;
-                    list.appendChild(sep);
                 }
+                App.nav('screen-vote-summary');
+            },
+
+            revealFromVoting: () => {
                 App.state.outcome = App.state.voteOutcome;
                 App.state.outcomeSub = App.state.voteOutcomeSub;
-                App.nav('screen-vote-summary');
+                
+                // Asignar puntos automáticamente
+                if (App.state.outcome === 'CIVILES GANAN') {
+                    App.applyCivilesWin();
+                } else {
+                    App.applyImpostorWin();
+                }
+                App.showResults();
             },
 
             startGame: () => {
@@ -990,47 +1057,47 @@
 
             openGuessPhase: () => {
                 clearInterval(App.state.timerInterval);
-                App.state.outcome = null;
-                App.state.outcomeSub = null;
-                const outcomeBox = document.getElementById('guessOutcome');
-                const modal = document.getElementById('confirmGuessModal');
-                if (outcomeBox) outcomeBox.classList.add('hidden');
-                if (modal) modal.classList.add('hidden');
+                document.getElementById('reveal-word-section').classList.remove('hidden');
+                document.getElementById('check-guess-section').classList.add('hidden');
+                
+                const skipBtn = document.getElementById('btn-skip-guess');
+                if (App.state.voteOutcome) {
+                    skipBtn.innerText = "SALTAR ADIVINANZA Y REVELAR";
+                    skipBtn.style.opacity = "1";
+                } else {
+                    skipBtn.innerText = "CANCELAR / VOLVER";
+                    skipBtn.style.opacity = "0.6";
+                }
+                
                 App.nav('screen-guess');
             },
 
-            confirmGuessIntent: () => {
-                const modal = document.getElementById('confirmGuessModal');
-                if (modal) modal.classList.remove('hidden');
-            },
-
-            confirmGuessProceed: () => {
-                const modal = document.getElementById('confirmGuessModal');
-                const outcomeBox = document.getElementById('guessOutcome');
-                if (modal) modal.classList.add('hidden');
-                if (outcomeBox) outcomeBox.classList.remove('hidden');
-            },
-
-            confirmGuessCancel: () => {
-                const modal = document.getElementById('confirmGuessModal');
-                if (modal) modal.classList.add('hidden');
+            revealSecretWordForGuess: () => {
+                const civilData = App.state.players.find(p => p.type === 'civil');
+                document.getElementById('guessed-secret-word').innerText = civilData.word;
+                document.getElementById('reveal-word-section').classList.add('hidden');
+                document.getElementById('check-guess-section').classList.remove('hidden');
             },
 
             resolveGuess: (isCorrect) => {
                 if (isCorrect) {
                     App.state.outcome = 'IMPOSTOR GANA';
-                    App.state.outcomeSub = 'Adivinó la palabra civil correctamente.';
+                    App.state.outcomeSub = 'Adivinó la palabra correctamente.';
+                    App.applyImpostorWin();
                 } else {
-                    App.state.outcome = 'IMPOSTOR ELIMINADO';
-                    App.state.outcomeSub = 'Adivinó mal y queda fuera.';
+                    App.state.outcome = 'CIVILES GANAN';
+                    App.state.outcomeSub = 'El impostor falló su adivinanza.';
+                    App.applyCivilesWin();
                 }
                 App.showResults();
             },
 
             skipGuess: () => {
-                App.state.outcome = 'REVELACIÓN FINAL';
-                App.state.outcomeSub = 'Se muestran las palabras y el impostor.';
-                App.showResults();
+                if (App.state.voteOutcome) {
+                    App.showResults();
+                } else {
+                    App.nav('screen-game');
+                }
             },
 
             showResults: () => {
