@@ -551,6 +551,14 @@
             </div>
         </div>
 
+        <div id="screen-vote-summary" class="screen">
+            <h2>RESUMEN DE VOTOS</h2>
+            <div class="panel" style="border-color: var(--sq-pink);">
+                <div id="vote-summary-list" style="display: grid; gap: 10px; text-align: left; font-size: 0.95rem;"></div>
+                <button class="btn btn-pink" onclick="App.openGuessPhase()" style="margin-top: 20px;">CONTINUAR</button>
+            </div>
+        </div>
+
         <div id="screen-guess" class="screen">
             <h2>FASE FINAL</h2>
             <div class="panel" style="border-color: var(--sq-teal);">
@@ -746,7 +754,9 @@
                 scoreApplied: false,
                 turnOrder: [],
                 voteIndex: 0,
-                votes: {}
+                votes: {},
+                voteOutcome: null,
+                voteOutcomeSub: null
             },
 
             updateTimeLabel: (val) => {
@@ -768,6 +778,8 @@
                 App.state.scoreApplied = false;
                 App.state.votes = {};
                 App.state.voteIndex = 0;
+                App.state.voteOutcome = null;
+                App.state.voteOutcomeSub = null;
                 const names = [
                     { key: "PAPA", label: "PAPÁ" },
                     { key: "MAMA", label: "MAMÁ" },
@@ -878,8 +890,81 @@
                 if (App.state.voteIndex < 3) {
                     App.renderVoteScreen();
                 } else {
-                    App.openGuessPhase();
+                    App.resolveVoting();
                 }
+            },
+
+            resolveVoting: () => {
+                const counts = {};
+                Object.values(App.state.votes).forEach(target => {
+                    counts[target] = (counts[target] || 0) + 1;
+                });
+                const entries = Object.entries(counts);
+                if (entries.length === 0) {
+                    App.state.voteOutcome = 'IMPOSTOR GANA';
+                    App.state.voteOutcomeSub = 'No hubo votos registrados.';
+                    App.showVoteSummary();
+                    return;
+                }
+
+                let maxVotes = -1;
+                let winners = [];
+                entries.forEach(([key, value]) => {
+                    if (value > maxVotes) {
+                        maxVotes = value;
+                        winners = [key];
+                    } else if (value === maxVotes) {
+                        winners.push(key);
+                    }
+                });
+
+                const impostor = App.state.players.find(p => p.type === 'impostor');
+                if (!impostor) {
+                    App.state.voteOutcome = 'RESULTADO FINAL';
+                    App.state.voteOutcomeSub = 'No se pudo determinar al impostor.';
+                    App.showVoteSummary();
+                    return;
+                }
+
+                if (winners.length > 1) {
+                    App.state.voteOutcome = 'IMPOSTOR GANA';
+                    App.state.voteOutcomeSub = 'Empate en la votación.';
+                    App.showVoteSummary();
+                    return;
+                }
+
+                const eliminatedKey = winners[0];
+                if (eliminatedKey === impostor.nameKey) {
+                    App.state.voteOutcome = 'CIVILES GANAN';
+                    App.state.voteOutcomeSub = 'Expulsaron al impostor.';
+                } else {
+                    App.state.voteOutcome = 'IMPOSTOR GANA';
+                    App.state.voteOutcomeSub = 'Expulsaron a un civil.';
+                }
+                App.showVoteSummary();
+            },
+
+            showVoteSummary: () => {
+                const list = document.getElementById('vote-summary-list');
+                if (list) {
+                    list.innerHTML = '';
+                    App.state.players.forEach(p => {
+                        const voted = App.state.votes[p.nameKey];
+                        const target = App.state.players.find(t => t.nameKey === voted);
+                        const line = document.createElement('div');
+                        line.innerText = `${p.nameLabel} → ${target ? target.nameLabel : 'SIN VOTO'}`;
+                        list.appendChild(line);
+                    });
+                    const sep = document.createElement('div');
+                    sep.style.marginTop = '10px';
+                    sep.style.color = '#777';
+                    sep.style.fontSize = '0.8rem';
+                    sep.innerText = `${App.state.voteOutcome} · ${App.state.voteOutcomeSub}`;
+                    list.appendChild(sep);
+                }
+                App.state.outcome = App.state.voteOutcome;
+                App.state.outcomeSub = App.state.voteOutcomeSub;
+                App.nav('screen-vote-summary');
             },
 
             startGame: () => {
