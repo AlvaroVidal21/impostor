@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -9,19 +10,27 @@
     <style>
         /* --- SQUID GAME PALETTE & CORE --- */
         :root {
-            --sq-pink: #FF007A; /* Color Guardia/Sangre */
-            --sq-teal: #00AE8F; /* Color Jugador */
-            --sq-gold: #FFD700; /* Color Dinero/VIP */
+            --sq-pink: #FF007A;
+            /* Color Guardia/Sangre */
+            --sq-teal: #00AE8F;
+            /* Color Jugador */
+            --sq-gold: #FFD700;
+            /* Color Dinero/VIP */
             --sq-dark: #0a0a0a;
             --sq-panel: #141414;
             --sq-text: #eaeaea;
             --font-main: 'Orbitron', sans-serif;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
-        
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
         body {
-            margin: 0; padding: 0;
+            margin: 0;
+            padding: 0;
             background-color: var(--sq-dark);
             color: var(--sq-text);
             font-family: var(--font-main);
@@ -36,131 +45,352 @@
         /* --- EFECTO MONITOR CRT/CCTV --- */
         body::after {
             content: "";
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 2px);
-            pointer-events: none; z-index: 99;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.15) 0px, rgba(0, 0, 0, 0.15) 1px, transparent 1px, transparent 2px);
+            pointer-events: none;
+            z-index: 99;
         }
 
         /* --- UI UTILS --- */
         .screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            padding: 20px; background: var(--sq-dark);
-            transition: opacity 0.3s ease; opacity: 0; pointer-events: none; z-index: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: var(--sq-dark);
+            transition: opacity 0.3s ease;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 0;
         }
-        .screen.active { opacity: 1; pointer-events: all; z-index: 10; }
-        .hidden { display: none !important; }
+
+        .screen.active {
+            opacity: 1;
+            pointer-events: all;
+            z-index: 10;
+        }
+
+        .hidden {
+            display: none !important;
+        }
 
         /* --- TYPOGRAPHY & SHAPES --- */
-        h1 { color: var(--sq-pink); font-weight: 900; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 15px; text-align: center; text-shadow: 0 0 10px rgba(255, 0, 122, 0.5); }
-        h2 { color: var(--sq-teal); font-size: 1.1rem; margin-bottom: 30px; letter-spacing: 1px; text-transform: uppercase; }
-        
-        .big-number { font-size: 7rem; color: #fff; margin: 20px 0; font-weight: 900; text-shadow: 0 0 20px var(--sq-teal); }
-        
-        .shapes-header { font-size: 2.5rem; letter-spacing: 20px; margin-bottom: 30px; opacity: 0.9; }
-        .shape-c { color: #fff; } .shape-t { color: var(--sq-pink); } .shape-s { color: var(--sq-teal); }
+        h1 {
+            color: var(--sq-pink);
+            font-weight: 900;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(255, 0, 122, 0.5);
+        }
+
+        h2 {
+            color: var(--sq-teal);
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .big-number {
+            font-size: 7rem;
+            color: #fff;
+            margin: 20px 0;
+            font-weight: 900;
+            text-shadow: 0 0 20px var(--sq-teal);
+        }
+
+        .shapes-header {
+            font-size: 2.5rem;
+            letter-spacing: 20px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .shape-c {
+            color: #fff;
+        }
+
+        .shape-t {
+            color: var(--sq-pink);
+        }
+
+        .shape-s {
+            color: var(--sq-teal);
+        }
 
         /* --- PANELS & BUTTONS --- */
         .panel {
             background: var(--sq-panel);
             border: 2px solid #333;
-            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
             padding: 35px 25px;
             border-radius: 4px;
-            width: 100%; max-width: 450px;
+            width: 100%;
+            max-width: 450px;
             text-align: center;
             position: relative;
             overflow: hidden;
         }
-        .panel::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 6px; background: linear-gradient(90deg, var(--sq-pink) 30%, var(--sq-teal) 70%); }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, var(--sq-pink) 30%, var(--sq-teal) 70%);
+        }
 
         .btn {
-            background: transparent; border: 2px solid var(--sq-teal); color: var(--sq-teal);
-            padding: 18px; width: 100%; font-family: var(--font-main); font-size: 1.2rem; font-weight: 900;
-            cursor: pointer; margin-top: 25px; text-transform: uppercase; transition: all 0.2s;
-            letter-spacing: 2px; position: relative; overflow: hidden;
+            background: transparent;
+            border: 2px solid var(--sq-teal);
+            color: var(--sq-teal);
+            padding: 18px;
+            width: 100%;
+            font-family: var(--font-main);
+            font-size: 1.2rem;
+            font-weight: 900;
+            cursor: pointer;
+            margin-top: 25px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
         }
-        .btn:active { background: var(--sq-teal); color: var(--sq-dark); box-shadow: 0 0 20px var(--sq-teal); }
-        .btn-pink { border-color: var(--sq-pink); color: var(--sq-pink); }
-        .btn-pink:active { background: var(--sq-pink); color: #fff; box-shadow: 0 0 20px var(--sq-pink); }
+
+        .btn:active {
+            background: var(--sq-teal);
+            color: var(--sq-dark);
+            box-shadow: 0 0 20px var(--sq-teal);
+        }
+
+        .btn-pink {
+            border-color: var(--sq-pink);
+            color: var(--sq-pink);
+        }
+
+        .btn-pink:active {
+            background: var(--sq-pink);
+            color: #fff;
+            box-shadow: 0 0 20px var(--sq-pink);
+        }
 
         /* --- THE BLACK BOX (SEGURIDAD) --- */
         .secure-zone {
-            position: relative; width: 100%; height: 220px;
-            margin: 25px 0; border: 3px dashed #444; background: #000;
-            display: flex; justify-content: center; align-items: center;
-            overflow: hidden; transition: border-color 0.3s;
+            position: relative;
+            width: 100%;
+            height: 220px;
+            margin: 25px 0;
+            border: 3px dashed #444;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            transition: border-color 0.3s;
         }
 
         /* Máscara Superior */
         .mask-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #1a1a1a; z-index: 2;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 0.1s linear; cursor: pointer;
-            background-image: radial-gradient(#2a2a2a 1px, transparent 1px); background-size: 10px 10px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1a1a1a;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.1s linear;
+            cursor: pointer;
+            background-image: radial-gradient(#2a2a2a 1px, transparent 1px);
+            background-size: 10px 10px;
         }
-        .mask-icons { font-size: 3rem; letter-spacing: 10px; margin-bottom: 15px; color: #555; }
-        .mask-text { color: var(--sq-teal); font-size: 0.8rem; letter-spacing: 1px; animation: blink 2s infinite; }
+
+        .mask-icons {
+            font-size: 3rem;
+            letter-spacing: 10px;
+            margin-bottom: 15px;
+            color: #555;
+        }
+
+        .mask-text {
+            color: var(--sq-teal);
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            animation: blink 2s infinite;
+        }
 
         /* Contenido Secreto */
         .secret-content-container {
-            z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            width: 100%; height: 100%;
-            opacity: 0; transition: opacity 0.2s ease-in;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.2s ease-in;
         }
 
-        .role-title { font-size: 1rem; letter-spacing: 2px; margin-bottom: 15px; text-transform: uppercase; }
-        .actual-word { font-size: 2.2rem; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
+        .role-title {
+            font-size: 1rem;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .actual-word {
+            font-size: 2.2rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
 
         /* Lógica de revelado */
-        .secure-zone:active .mask-overlay { opacity: 0; pointer-events: none; }
-        .secure-zone:active .secret-content-container { opacity: 1; }
-        
+        .secure-zone:active .mask-overlay {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .secure-zone:active .secret-content-container {
+            opacity: 1;
+        }
+
         /* Desktop support */
-        .secure-zone:hover { cursor: pointer; }
-        .secure-zone:active { cursor: none; }
+        .secure-zone:hover {
+            cursor: pointer;
+        }
 
-        .reveal-civil .role-title { color: var(--sq-teal); }
-        .reveal-civil .actual-word { color: #fff; text-shadow: 0 0 10px var(--sq-teal); }
-        .reveal-civil { border-color: var(--sq-teal); }
+        .secure-zone:active {
+            cursor: none;
+        }
 
-        .reveal-impostor .role-title { color: var(--sq-pink); animation: blink-fast 0.5s infinite alternate; }
-        .reveal-impostor .actual-word { color: var(--sq-pink); font-size: 2.4rem; text-shadow: 0 0 15px var(--sq-pink); }
-        .reveal-impostor { border-color: var(--sq-pink); background: #1a000a; }
+        .reveal-civil .role-title {
+            color: var(--sq-teal);
+        }
+
+        .reveal-civil .actual-word {
+            color: #fff;
+            text-shadow: 0 0 10px var(--sq-teal);
+        }
+
+        .reveal-civil {
+            border-color: var(--sq-teal);
+        }
+
+        .reveal-impostor .role-title {
+            color: var(--sq-pink);
+            animation: blink-fast 0.5s infinite alternate;
+        }
+
+        .reveal-impostor .actual-word {
+            color: var(--sq-pink);
+            font-size: 2.4rem;
+            text-shadow: 0 0 15px var(--sq-pink);
+        }
+
+        .reveal-impostor {
+            border-color: var(--sq-pink);
+            background: #1a000a;
+        }
 
         /* --- ANIMATIONS --- */
-        @keyframes blink { 50% { opacity: 0.5; } }
-        @keyframes blink-fast { from { opacity: 1; transform: scale(1); } to { opacity: 0.7; transform: scale(1.05); } }
-        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(255, 0, 122, 0.4); } 70% { box-shadow: 0 0 0 20px rgba(255, 0, 122, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 0, 122, 0); } }
+        @keyframes blink {
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes blink-fast {
+            from {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            to {
+                opacity: 0.7;
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 0, 122, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 20px rgba(255, 0, 122, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 0, 122, 0);
+            }
+        }
 
         /* --- TIMER LED STYLE --- */
         #timer {
-            font-family: 'Orbitron', monospace; font-variant-numeric: tabular-nums;
-            text-shadow: 0 0 20px currentColor; letter-spacing: 5px;
+            font-family: 'Orbitron', monospace;
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 20px currentColor;
+            letter-spacing: 5px;
         }
-        .timer-danger { color: var(--sq-pink) !important; animation: blink 0.5s infinite; }
+
+        .timer-danger {
+            color: var(--sq-pink) !important;
+            animation: blink 0.5s infinite;
+        }
 
         /* --- SETTINGS SLIDER --- */
-        input[type=range] { width: 100%; accent-color: var(--sq-pink); cursor: pointer; margin: 20px 0; }
-        .time-display { font-size: 2rem; color: var(--sq-pink); font-weight: bold; }
+        input[type=range] {
+            width: 100%;
+            accent-color: var(--sq-pink);
+            cursor: pointer;
+            margin: 20px 0;
+        }
 
+        .time-display {
+            font-size: 2rem;
+            color: var(--sq-pink);
+            font-weight: bold;
+        }
     </style>
 </head>
+
 <body>
 
     <div id="screen-home" class="screen active">
-        <div class="shapes-header"><span class="shape-c">○</span><span class="shape-t">△</span><span class="shape-s">□</span></div>
+        <div class="shapes-header"><span class="shape-c">○</span><span class="shape-t">△</span><span
+                class="shape-s">□</span></div>
         <h1>Protocolo<br>Impostor</h1>
-        
+
         <div class="panel">
             <h2 style="color: #888; border-bottom: 1px solid #333; padding-bottom: 10px;">Parámetros del Juego</h2>
-            
+
             <div style="margin-top: 30px;">
-                <label style="font-size: 0.8rem; color: var(--sq-teal); letter-spacing: 1px;">TIEMPO DE DISCUSIÓN</label>
+                <label style="font-size: 0.8rem; color: var(--sq-teal); letter-spacing: 1px;">TIEMPO DE
+                    DISCUSIÓN</label>
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                     <span id="timeDisplay" class="time-display">3m</span>
-                    <input type="range" id="timeSlider" min="1" max="10" value="3" step="1" oninput="App.updateTimeLabel(this.value)">
+                    <input type="range" id="timeSlider" min="1" max="10" value="3" step="1"
+                        oninput="App.updateTimeLabel(this.value)">
                 </div>
             </div>
 
@@ -170,7 +400,8 @@
                 <strong style="color: var(--sq-pink);">No confíes en nadie.</strong>
             </p>
 
-            <button class="btn btn-pink" onclick="App.initGame()" style="animation: pulse-red 2s infinite;">INICIAR RONDA</button>
+            <button class="btn btn-pink" onclick="App.initGame()" style="animation: pulse-red 2s infinite;">INICIAR
+                RONDA</button>
         </div>
     </div>
 
@@ -201,16 +432,18 @@
                 </div>
             </div>
 
-            <p style="font-size: 0.8rem; color: var(--sq-pink); margin-top: 15px;">Al soltar, la información se destruye.</p>
+            <p style="font-size: 0.8rem; color: var(--sq-pink); margin-top: 15px;">Al soltar, la información se
+                destruye.</p>
             <button class="btn btn-pink" onclick="App.finishTurn()">MEMORIZADO. OCULTAR.</button>
         </div>
     </div>
 
     <div id="screen-game" class="screen">
-        <div class="shapes-header" style="font-size: 1.5rem; opacity: 0.5;"><span class="shape-c">○</span> <span class="shape-t">△</span> <span class="shape-s">□</span></div>
+        <div class="shapes-header" style="font-size: 1.5rem; opacity: 0.5;"><span class="shape-c">○</span> <span
+                class="shape-t">△</span> <span class="shape-s">□</span></div>
         <h2 style="margin: 0; color: #fff;">TIEMPO RESTANTE</h2>
         <div id="timer" class="big-number" style="color: var(--sq-gold); font-size: 6rem;">00:00</div>
-        
+
         <div class="panel" style="margin-top: 20px;">
             <p style="font-size: 1.1rem;">Debate iniciado.<br>Identifiquen al infiltrado.</p>
             <button class="btn btn-pink" onclick="App.showResults()">FINALIZAR Votación</button>
@@ -227,15 +460,18 @@
                 </div>
                 <div style="text-align: right;">
                     <span style="font-size: 0.7rem; color: #888; color: var(--sq-pink);">PALABRA IMPOSTOR</span><br>
-                    <span id="res-impostor" style="font-size: 1.3rem; color: var(--sq-pink); font-weight: bold;">...</span>
+                    <span id="res-impostor"
+                        style="font-size: 1.3rem; color: var(--sq-pink); font-weight: bold;">...</span>
                 </div>
             </div>
 
             <div style="background: #1a000a; padding: 20px; border: 2px solid var(--sq-pink);">
                 <p style="font-size: 0.9rem; color: var(--sq-pink); margin-bottom: 10px;">IDENTIDAD DEL IMPOSTOR:</p>
-                <h2 id="res-player" style="color: #fff; font-size: 3rem; margin: 0; text-shadow: 0 0 15px var(--sq-pink);">JUGADOR X</h2>
+                <h2 id="res-player"
+                    style="color: #fff; font-size: 3rem; margin: 0; text-shadow: 0 0 15px var(--sq-pink);">JUGADOR X
+                </h2>
             </div>
-            
+
             <button class="btn" onclick="location.reload()" style="margin-top: 30px;">NUEVA PARTIDA</button>
         </div>
     </div>
@@ -243,57 +479,48 @@
     <script>
         // --- BASE DE DATOS MASIVA (60 PARES) ---
         const DB = [
-			// --- CLÁSICOS (Tus originales) ---
-			{ c: "Playa", i: "Piscina" }, { c: "Cine", i: "Teatro" }, { c: "Perro", i: "Gato" },
-			{ c: "Guitarra", i: "Piano" }, { c: "Fútbol", i: "Baloncesto" }, { c: "Café", i: "Té" },
-			{ c: "Hamburguesa", i: "Pizza" }, { c: "Superman", i: "Batman" }, { c: "Coche", i: "Moto" },
-			{ c: "Sol", i: "Luna" }, { c: "Invierno", i: "Verano" }, { c: "Wifi", i: "Datos 5G" },
-			{ c: "Android", i: "iPhone" }, { c: "Netflix", i: "YouTube" }, { c: "Agua", i: "Refresco" },
-			{ c: "Avión", i: "Helicóptero" }, { c: "Hotel", i: "Camping" }, { c: "Libro", i: "Revista" },
+            // --- COCINA (El campo de batalla sensorial) ---
+            // Dificultad: Texturas y formas idénticas
+            { c: "Sopa", i: "Cereal" },            // Clásico debate: Ambos usan tazón, cuchara y tienen líquido+sólido.
+            { c: "Manzana", i: "Tomate" },         // Visual: Rojos, redondos, brillantes. Si dices "Es rojo", sobrevives.
+            { c: "Harina", i: "Azúcar Glass" },    // Visual: Polvo blanco en la cocina.
+            { c: "Microondas", i: "Horno" },       // Uso: "Calienta comida", "Tiene puerta", "Está en la cocina".
+            { c: "Vaso", i: "Taza" },              // Uso: Para beber. La diferencia es el asa (detalle sutil).
+            { c: "Hielo", i: "Cristal/Vidrio" },   // Visual: Transparente, duro, corta/frío.
+            { c: "Galleta", i: "Pan" },            // Insumo: Harina, se hornea, se come.
 
-			// --- COMIDA (Confusión sensorial) ---
-			{ c: "Tacos", i: "Burritos" },          // Ambos tienen tortilla, pero uno se cierra
-			{ c: "Ketchup", i: "Mostaza" },         // "Se lo pongo a todo"
-			{ c: "Huevo Frito", i: "Huevo Duro" },  // Uno es líquido, el otro sólido
-			{ c: "Sal", i: "Azúcar" },              // Se ven igual, saben opuesto (¡Caos total!)
-			{ c: "Pan", i: "Tostada" },             // "Es suave" vs "Es duro"
-			{ c: "Tenedor", i: "Cuchara" },         // "Pincha" vs "Recoge"
-			{ c: "Limón", i: "Naranja" },           // Ácido vs Dulce
-			{ c: "Leche", i: "Yogur" },             // Líquido vs Cremoso
-			{ c: "Palomitas", i: "Papas Fritas" },  // Snacks salados de cine
+            // --- BAÑO Y LIMPIEZA (Confusión de rutina) ---
+            // Dificultad: Acciones muy parecidas
+            { c: "Champú", i: "Jabón Líquido" },   // Uso: Hace espuma, huele rico, se usa en la ducha.
+            { c: "Cepillo de Dientes", i: "Peine" },// Forma: Mango largo con cerdas/púas.
+            { c: "Toalla", i: "Sábana" },          // Material: Tela grande que te cubre.
+            { c: "Lavadora", i: "Secadora" },      // Visual: Caja blanca grande con puerta redonda que da vueltas.
+            { c: "Perfume", i: "Desodorante" },    // Uso: Para oler bien.
 
-			// --- HOGAR Y OBJETOS (Confusión de uso) ---
-			{ c: "Papel Higiénico", i: "Servilleta" }, // EL MEJOR: "¿Lo usas en la mesa?"
-			{ c: "Cama", i: "Sofá" },               // "¿Duermes ahí?"
-			{ c: "Ducha", i: "Tina" },              // De pie vs Acostado
-			{ c: "Escoba", i: "Trapeador" },        // Seco vs Mojado
-			{ c: "Lápiz", i: "Lapicero" },          // "¿Se puede borrar?" (Clave para pillar al impostor)
-			{ c: "Reloj", i: "Pulsera" },           // Ambos van en la muñeca
-			{ c: "Zapatos", i: "Calcetines" },      // Ambos van en los pies
-			{ c: "Gafas", i: "Lentes de Sol" },     // Ver mejor vs Ver oscuro
-			{ c: "Espejo", i: "Foto" },             // Reflejo vs Imagen estática
+            // --- SALA Y TECNOLOGÍA CASERA ---
+            // Dificultad: Pantallas y botones
+            { c: "Televisor", i: "Monitor PC" },   // Visual: Pantalla negra rectangular.
+            { c: "Mando TV", i: "Celular" },       // Uso: Lo tienes en la mano, tiene botones, controla cosas.
+            { c: "Lámpara", i: "Sol" },            // Función: Da luz, molesta a los ojos si miras directo.
+            { c: "Cuadro/Pintura", i: "Ventana" }, // Visual: Marco rectangular en la pared. (Muy poético/difícil).
+            { c: "Videojuego", i: "Película" },    // Uso: Sale en la TV, entretiene.
 
-			// --- NATURALEZA Y ANIMALES (Visual) ---
-			{ c: "Tiburón", i: "Ballena" },         // "¿Es peligroso?"
-			{ c: "Mosquito", i: "Abeja" },          // Ambos pican/vuelan
-			{ c: "Lluvia", i: "Nieve" },            // Agua cayendo
-			{ c: "Mono", i: "Humano" },             // ¡Filosófico y gracioso!
-			{ c: "Caballo", i: "Burro" },           // Transporte animal
-			{ c: "Árbol", i: "Flor" },              // Planta grande vs pequeña
+            // --- ANIMALES (Confusión biológica) ---
+            // Dificultad: Rasgos compartidos
+            { c: "Lobo", i: "Perro" },             // Visual: 4 patas, peludos, hocico.
+            { c: "Tigre", i: "Gato" },             // Visual: Felinos, bigotes, cazan.
+            { c: "Pez", i: "Submarino" },          // Contexto: Va bajo el agua.
+            { c: "Pájaro", i: "Avión" },           // Acción: Vuela, tiene alas.
+            { c: "Mariposa", i: "Hada" },          // Visual: Alas bonitas, pequeña, vuela.
 
-			// --- SITUACIONES DIVERTIDAS (Contexto) ---
-			{ c: "Boda", i: "Funeral" },            // Traje formal, pero ánimos opuestos
-			{ c: "Escuela", i: "Cárcel" },          // "No me dejan salir" (Broma clásica)
-			{ c: "Amor", i: "Amistad" },            // "¿Hay besos?"
-			{ c: "Beso", i: "Abrazo" },             // Contacto físico
-			{ c: "Fantasma", i: "Zombie" },         // Muertos vivientes
-			{ c: "Mentira", i: "Broma" },           // Engaño malicioso vs gracioso
-			{ c: "Llorar", i: "Sudar" },            // Agua saliendo del cuerpo
-			{ c: "Gritar", i: "Susurrar" },         // Volumen de voz
-			{ c: "Dinero", i: "Tarjeta" },          // Formas de pagar
-			{ c: "Policía", i: "Ladrón" },          // Opuestos en la ley
-			{ c: "Suegra", i: "Bruja" }             // (Broma clásica familiar)
-		];
+            // --- FAMILIA Y ROLES (Situaciones sociales) ---
+            // Dificultad: Sentimientos y jerarquías
+            { c: "Cumpleaños", i: "Navidad" },     // Contexto: Regalos, pastel, familia reunida.
+            { c: "Colegio", i: "Trabajo" },        // Rutina: Tienes que ir temprano, te aburres, quieres volver a casa.
+            { c: "Abuela", i: "Mamá" },            // Rol: Mujer que te cuida y te da comida.
+            { c: "Bebé", i: "Muñeco" },            // Visual: Pequeño, humanoide, se carga en brazos.
+            { c: "Doctor", i: "Dentista" },        // Contexto: Bata blanca, da miedo, cura.
+        ];
 
         // --- LÓGICA DEL JUEGO ---
         const App = {
@@ -385,7 +612,7 @@
                 const civilData = App.state.players.find(p => p.type === 'civil');
                 document.getElementById('res-civil').innerText = civilData.word;
                 document.getElementById('res-impostor').innerText = impostorData.word;
-                document.getElementById('res-player').innerText = "JUGADOR " + impostorData.id.toString().padStart(2,'0');
+                document.getElementById('res-player').innerText = "JUGADOR " + impostorData.id.toString().padStart(2, '0');
                 App.nav('screen-result');
             },
 
@@ -396,4 +623,5 @@
         };
     </script>
 </body>
+
 </html>
