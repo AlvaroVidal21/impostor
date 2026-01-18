@@ -371,6 +371,67 @@
             color: var(--sq-pink);
             font-weight: bold;
         }
+
+        /* --- INPUTS & FEEDBACK --- */
+        .guess-input {
+            width: 100%;
+            padding: 14px 12px;
+            background: #0f0f0f;
+            border: 2px solid #333;
+            color: #fff;
+            font-family: var(--font-main);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .guess-input:focus {
+            border-color: var(--sq-teal);
+            box-shadow: 0 0 12px rgba(0, 174, 143, 0.4);
+        }
+
+        .hint-text {
+            font-size: 0.75rem;
+            color: #777;
+            margin-top: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .feedback {
+            margin-top: 12px;
+            font-size: 0.9rem;
+            min-height: 20px;
+        }
+
+        .feedback.error {
+            color: var(--sq-pink);
+        }
+
+        .feedback.ok {
+            color: var(--sq-teal);
+        }
+
+        /* --- CONFIRM MODAL --- */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+
+        .modal-card {
+            background: var(--sq-panel);
+            border: 2px solid #333;
+            padding: 20px;
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -400,6 +461,19 @@
                 <strong style="color: var(--sq-pink);">No confíes en nadie.</strong>
             </p>
 
+            <p style="font-size: 0.75rem; color: #666; margin-top: 10px; letter-spacing: 1px;">
+                JUGADORES: <span style="color: var(--sq-teal);">PAPÁ • MAMÁ • SHERLOCK</span>
+            </p>
+
+            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #222;">
+                <p style="font-size: 0.7rem; color: #888; letter-spacing: 1px; margin-bottom: 8px;">MARCADOR</p>
+                <div id="scoreboard-home" style="display: flex; justify-content: space-between; gap: 10px; font-size: 0.9rem;">
+                    <div><span style="color: var(--sq-teal);">PAPÁ</span> <span id="score-papa">0</span></div>
+                    <div><span style="color: var(--sq-teal);">MAMÁ</span> <span id="score-mama">0</span></div>
+                    <div><span style="color: var(--sq-teal);">SHERLOCK</span> <span id="score-sherlock">0</span></div>
+                </div>
+            </div>
+
             <button class="btn btn-pink" onclick="App.initGame()" style="animation: pulse-red 2s infinite;">INICIAR
                 RONDA</button>
         </div>
@@ -408,6 +482,7 @@
     <div id="screen-handover" class="screen">
         <h2>TURNO DEL JUGADOR</h2>
         <div class="big-number" id="handover-num">01</div>
+        <div id="handover-name" style="font-size: 1.2rem; color: var(--sq-teal); letter-spacing: 2px; margin-top: -10px;">PAPÁ</div>
         <div class="panel" style="border-color: var(--sq-pink);">
             <p style="color: var(--sq-pink); font-weight: 900; font-size: 1.2rem;">⚠️ PROTOCOLO DE SEGURIDAD</p>
             <p style="margin: 20px 0; font-size: 1.1rem;">Entregue el dispositivo al jugador indicado.</p>
@@ -420,6 +495,7 @@
         <div class="panel">
             <h2 style="margin-bottom: 10px;">Identidad Clasificada</h2>
             <p style="font-size: 0.7rem; color: #666; margin-bottom: 20px;">Mantén presionado para desencriptar.</p>
+                <div id="reveal-player" style="font-size: 0.9rem; color: var(--sq-teal); letter-spacing: 1px; margin-bottom: 10px;">JUGADOR: PAPÁ</div>
 
             <div id="secure-box" class="secure-zone" ontouchstart="" onmousedown="">
                 <div class="mask-overlay">
@@ -446,12 +522,40 @@
 
         <div class="panel" style="margin-top: 20px;">
             <p style="font-size: 1.1rem;">Debate iniciado.<br>Identifiquen al infiltrado.</p>
-            <button class="btn btn-pink" onclick="App.showResults()">FINALIZAR Votación</button>
+                <button class="btn btn-pink" onclick="App.openGuessPhase()">FINALIZAR VOTACIÓN</button>
         </div>
     </div>
 
+        <div id="screen-guess" class="screen">
+            <h2>FASE FINAL</h2>
+            <div class="panel" style="border-color: var(--sq-teal);">
+                <p style="font-size: 0.95rem; line-height: 1.5; margin-bottom: 15px;">
+                    Si el impostor cree saber la palabra civil, puede intentar adivinarla ahora.
+                </p>
+                <div class="hint-text">El impostor lo dice en voz alta. No se escribe.</div>
+                <button class="btn" onclick="App.confirmGuessIntent()">QUIERO ADIVINAR</button>
+                <div id="guessOutcome" class="hidden" style="margin-top: 12px;">
+                    <p style="font-size: 0.8rem; color: #888; letter-spacing: 1px;">RESULTADO DEL INTENTO</p>
+                    <button class="btn" onclick="App.resolveGuess(true)">ADIVINÓ</button>
+                    <button class="btn btn-pink" onclick="App.resolveGuess(false)">FALLÓ</button>
+                </div>
+                <button class="btn btn-pink" onclick="App.skipGuess()">NO ADIVINAR. REVELAR</button>
+            </div>
+        </div>
+
+        <div id="confirmGuessModal" class="modal-backdrop hidden">
+            <div class="modal-card">
+                <p style="font-size: 0.95rem; line-height: 1.5; margin: 0 0 15px 0;">
+                    ¿Seguro que el impostor quiere adivinar la palabra en voz alta?
+                </p>
+                <button class="btn" onclick="App.confirmGuessProceed()">SÍ, CONTINUAR</button>
+                <button class="btn btn-pink" onclick="App.confirmGuessCancel()">CANCELAR</button>
+            </div>
+        </div>
+
     <div id="screen-result" class="screen">
-        <h1 style="font-size: 2.5rem; color: var(--sq-pink);">ELIMINADO</h1>
+        <h1 id="res-outcome" style="font-size: 2.5rem; color: var(--sq-pink);">RESULTADO FINAL</h1>
+        <p id="res-outcome-sub" style="font-size: 0.85rem; color: #777; margin-top: -10px;">Revelación de datos</p>
         <div class="panel" style="max-width: 500px;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
                 <div style="text-align: left;">
@@ -472,60 +576,96 @@
                 </h2>
             </div>
 
+            <div style="margin-top: 20px;">
+                <p style="font-size: 0.75rem; color: #888; letter-spacing: 1px; margin-bottom: 8px;">SUMAR PUNTO AL GANADOR</p>
+                <button class="btn" onclick="App.addPoint('PAPA')">+1 PAPÁ</button>
+                <button class="btn" onclick="App.addPoint('MAMA')">+1 MAMÁ</button>
+                <button class="btn" onclick="App.addPoint('SHERLOCK')">+1 SHERLOCK</button>
+            </div>
+
+            <div style="margin-top: 18px; padding-top: 12px; border-top: 1px solid #222;">
+                <p style="font-size: 0.7rem; color: #888; letter-spacing: 1px; margin-bottom: 8px;">MARCADOR</p>
+                <div id="scoreboard-result" style="display: flex; justify-content: space-between; gap: 10px; font-size: 0.9rem;">
+                    <div><span style="color: var(--sq-teal);">PAPÁ</span> <span id="score-papa-res">0</span></div>
+                    <div><span style="color: var(--sq-teal);">MAMÁ</span> <span id="score-mama-res">0</span></div>
+                    <div><span style="color: var(--sq-teal);">SHERLOCK</span> <span id="score-sherlock-res">0</span></div>
+                </div>
+            </div>
+
             <button class="btn" onclick="location.reload()" style="margin-top: 30px;">NUEVA PARTIDA</button>
         </div>
     </div>
 
     <script>
-        // --- BASE DE DATOS MASIVA (60 PARES) ---
+        // --- BASE DE DATOS (PARES RELACIONADOS, NO DEMASIADO IGUALES) ---
         const DB = [
-            // --- COCINA (El campo de batalla sensorial) ---
-            // Dificultad: Texturas y formas idénticas
-            { c: "Sopa", i: "Cereal" },            // Clásico debate: Ambos usan tazón, cuchara y tienen líquido+sólido.
-            { c: "Manzana", i: "Tomate" },         // Visual: Rojos, redondos, brillantes. Si dices "Es rojo", sobrevives.
-            { c: "Harina", i: "Azúcar Glass" },    // Visual: Polvo blanco en la cocina.
-            { c: "Microondas", i: "Horno" },       // Uso: "Calienta comida", "Tiene puerta", "Está en la cocina".
-            { c: "Vaso", i: "Taza" },              // Uso: Para beber. La diferencia es el asa (detalle sutil).
-            { c: "Hielo", i: "Cristal/Vidrio" },   // Visual: Transparente, duro, corta/frío.
-            { c: "Galleta", i: "Pan" },            // Insumo: Harina, se hornea, se come.
+            // HOGAR Y COCINA
+            { c: "Sopa", i: "Estofado" },
+            { c: "Galleta", i: "Tostada" },
+            { c: "Microondas", i: "Horno" },
+            { c: "Vaso", i: "Botella" },
+            { c: "Taza", i: "Termo" },
+            { c: "Sal", i: "Azúcar" },
+            { c: "Cuchara", i: "Tenedor" },
+            { c: "Fruta", i: "Verdura" },
 
-            // --- BAÑO Y LIMPIEZA (Confusión de rutina) ---
-            // Dificultad: Acciones muy parecidas
-            { c: "Champú", i: "Jabón Líquido" },   // Uso: Hace espuma, huele rico, se usa en la ducha.
-            { c: "Cepillo de Dientes", i: "Peine" },// Forma: Mango largo con cerdas/púas.
-            { c: "Toalla", i: "Sábana" },          // Material: Tela grande que te cubre.
-            { c: "Lavadora", i: "Secadora" },      // Visual: Caja blanca grande con puerta redonda que da vueltas.
-            { c: "Perfume", i: "Desodorante" },    // Uso: Para oler bien.
+            // BAÑO Y LIMPIEZA
+            { c: "Champú", i: "Acondicionador" },
+            { c: "Jabón", i: "Gel de baño" },
+            { c: "Cepillo de dientes", i: "Hilo dental" },
+            { c: "Toalla", i: "Albornoz" },
+            { c: "Lavadora", i: "Secadora" },
+            { c: "Esponja", i: "Trapo" },
 
-            // --- SALA Y TECNOLOGÍA CASERA ---
-            // Dificultad: Pantallas y botones
-            { c: "Televisor", i: "Monitor PC" },   // Visual: Pantalla negra rectangular.
-            { c: "Mando TV", i: "Celular" },       // Uso: Lo tienes en la mano, tiene botones, controla cosas.
-            { c: "Lámpara", i: "Sol" },            // Función: Da luz, molesta a los ojos si miras directo.
-            { c: "Cuadro/Pintura", i: "Ventana" }, // Visual: Marco rectangular en la pared. (Muy poético/difícil).
-            { c: "Videojuego", i: "Película" },    // Uso: Sale en la TV, entretiene.
+            // SALA Y TECNOLOGÍA
+            { c: "Televisor", i: "Proyector" },
+            { c: "Control remoto", i: "Celular" },
+            { c: "Lámpara", i: "Linterna" },
+            { c: "Videojuego", i: "Película" },
+            { c: "Audífonos", i: "Parlante" },
 
-            // --- ANIMALES (Confusión biológica) ---
-            // Dificultad: Rasgos compartidos
-            { c: "Lobo", i: "Perro" },             // Visual: 4 patas, peludos, hocico.
-            { c: "Tigre", i: "Gato" },             // Visual: Felinos, bigotes, cazan.
-            { c: "Pez", i: "Submarino" },          // Contexto: Va bajo el agua.
-            { c: "Pájaro", i: "Avión" },           // Acción: Vuela, tiene alas.
-            { c: "Mariposa", i: "Hada" },          // Visual: Alas bonitas, pequeña, vuela.
+            // ESCUELA Y OFICINA
+            { c: "Lápiz", i: "Lapicero" },
+            { c: "Cuaderno", i: "Libro" },
+            { c: "Tijeras", i: "Cúter" },
+            { c: "Pizarra", i: "Papelógrafo" },
 
-            // --- FAMILIA Y ROLES (Situaciones sociales) ---
-            // Dificultad: Sentimientos y jerarquías
-            { c: "Cumpleaños", i: "Navidad" },     // Contexto: Regalos, pastel, familia reunida.
-            { c: "Colegio", i: "Trabajo" },        // Rutina: Tienes que ir temprano, te aburres, quieres volver a casa.
-            { c: "Abuela", i: "Mamá" },            // Rol: Mujer que te cuida y te da comida.
-            { c: "Bebé", i: "Muñeco" },            // Visual: Pequeño, humanoide, se carga en brazos.
-            { c: "Doctor", i: "Dentista" },        // Contexto: Bata blanca, da miedo, cura.
+            // NATURALEZA
+            { c: "Sol", i: "Luna" },
+            { c: "Río", i: "Lago" },
+            { c: "Bosque", i: "Selva" },
+            { c: "Montaña", i: "Colina" },
+            { c: "Mariposa", i: "Libélula" },
+
+            // ANIMALES
+            { c: "Perro", i: "Lobo" },
+            { c: "Gato", i: "Zorro" },
+            { c: "Pájaro", i: "Murciélago" },
+            { c: "Pez", i: "Delfín" },
+
+            // TRANSPORTE
+            { c: "Carro", i: "Bus" },
+            { c: "Bicicleta", i: "Patineta" },
+            { c: "Avión", i: "Helicóptero" },
+            { c: "Barco", i: "Submarino" },
+
+            // TIEMPO Y EVENTOS
+            { c: "Cumpleaños", i: "Fiesta" },
+            { c: "Navidad", i: "Año Nuevo" },
+            { c: "Mañana", i: "Noche" }
         ];
 
         // --- LÓGICA DEL JUEGO ---
         const App = {
             state: {
-                players: [], turn: 0, gameDuration: 3, timerInterval: null
+                players: [],
+                turn: 0,
+                gameDuration: 3,
+                timerInterval: null,
+                pair: null,
+                outcome: null,
+                outcomeSub: null,
+                scores: { PAPA: 0, MAMA: 0, SHERLOCK: 0 }
             },
 
             updateTimeLabel: (val) => {
@@ -535,22 +675,37 @@
 
             initGame: () => {
                 const pair = DB[Math.floor(Math.random() * DB.length)];
+                App.state.pair = pair;
+                const names = [
+                    { key: "PAPA", label: "PAPÁ" },
+                    { key: "MAMA", label: "MAMÁ" },
+                    { key: "SHERLOCK", label: "SHERLOCK" }
+                ];
                 let rawRoles = [
-                    { type: 'civil', word: pair.c }, { type: 'civil', word: pair.c }, { type: 'impostor', word: pair.i }
+                    { type: 'impostor', word: pair.i },
+                    { type: 'civil', word: pair.c },
+                    { type: 'civil', word: pair.c }
                 ];
                 // Shuffle Fisher-Yates
                 for (let i = rawRoles.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [rawRoles[i], rawRoles[j]] = [rawRoles[j], rawRoles[i]];
                 }
-                App.state.players = rawRoles.map((r, idx) => ({ ...r, id: idx + 1 }));
+                App.state.players = rawRoles.map((r, idx) => ({
+                    ...r,
+                    id: idx + 1,
+                    nameKey: names[idx].key,
+                    nameLabel: names[idx].label
+                }));
                 App.state.turn = 0;
                 App.nav('screen-handover');
                 App.updateHandover();
             },
 
             updateHandover: () => {
-                document.getElementById('handover-num').innerText = App.state.players[App.state.turn].id.toString().padStart(2, '0');
+                const player = App.state.players[App.state.turn];
+                document.getElementById('handover-num').innerText = player.id.toString().padStart(2, '0');
+                document.getElementById('handover-name').innerText = player.nameLabel;
             },
 
             prepareReveal: () => {
@@ -558,6 +713,7 @@
                 const secureBox = document.getElementById('secure-box');
                 const roleTitleEl = document.getElementById('secret-role-title');
                 const wordEl = document.getElementById('secret-word');
+                const revealPlayerEl = document.getElementById('reveal-player');
 
                 // Limpiar clases previas
                 secureBox.classList.remove('reveal-civil', 'reveal-impostor');
@@ -571,6 +727,7 @@
                     secureBox.classList.add('reveal-civil');
                 }
                 wordEl.innerText = player.word;
+                revealPlayerEl.innerText = "JUGADOR: " + player.nameLabel;
 
                 App.nav('screen-reveal');
             },
@@ -606,14 +763,88 @@
                 }, 1000);
             },
 
+            openGuessPhase: () => {
+                clearInterval(App.state.timerInterval);
+                App.state.outcome = null;
+                App.state.outcomeSub = null;
+                const outcomeBox = document.getElementById('guessOutcome');
+                const modal = document.getElementById('confirmGuessModal');
+                if (outcomeBox) outcomeBox.classList.add('hidden');
+                if (modal) modal.classList.add('hidden');
+                App.nav('screen-guess');
+            },
+
+            confirmGuessIntent: () => {
+                const modal = document.getElementById('confirmGuessModal');
+                if (modal) modal.classList.remove('hidden');
+            },
+
+            confirmGuessProceed: () => {
+                const modal = document.getElementById('confirmGuessModal');
+                const outcomeBox = document.getElementById('guessOutcome');
+                if (modal) modal.classList.add('hidden');
+                if (outcomeBox) outcomeBox.classList.remove('hidden');
+            },
+
+            confirmGuessCancel: () => {
+                const modal = document.getElementById('confirmGuessModal');
+                if (modal) modal.classList.add('hidden');
+            },
+
+            resolveGuess: (isCorrect) => {
+                if (isCorrect) {
+                    App.state.outcome = 'IMPOSTOR GANA';
+                    App.state.outcomeSub = 'Adivinó la palabra civil correctamente.';
+                } else {
+                    App.state.outcome = 'IMPOSTOR ELIMINADO';
+                    App.state.outcomeSub = 'Adivinó mal y queda fuera.';
+                }
+                App.showResults();
+            },
+
+            skipGuess: () => {
+                App.state.outcome = 'REVELACIÓN FINAL';
+                App.state.outcomeSub = 'Se muestran las palabras y el impostor.';
+                App.showResults();
+            },
+
             showResults: () => {
                 clearInterval(App.state.timerInterval);
                 const impostorData = App.state.players.find(p => p.type === 'impostor');
                 const civilData = App.state.players.find(p => p.type === 'civil');
                 document.getElementById('res-civil').innerText = civilData.word;
                 document.getElementById('res-impostor').innerText = impostorData.word;
-                document.getElementById('res-player').innerText = "JUGADOR " + impostorData.id.toString().padStart(2, '0');
+                document.getElementById('res-player').innerText = impostorData.nameLabel;
+                const outcomeEl = document.getElementById('res-outcome');
+                const outcomeSubEl = document.getElementById('res-outcome-sub');
+                const outcomeText = App.state.outcome || 'RESULTADO FINAL';
+                const outcomeSub = App.state.outcomeSub || 'Revelación de datos';
+                outcomeEl.innerText = outcomeText;
+                outcomeSubEl.innerText = outcomeSub;
+                App.updateScoreUI();
                 App.nav('screen-result');
+            },
+
+            addPoint: (playerKey) => {
+                if (!App.state.scores[playerKey] && App.state.scores[playerKey] !== 0) return;
+                App.state.scores[playerKey] += 1;
+                App.updateScoreUI();
+            },
+
+            updateScoreUI: () => {
+                const s = App.state.scores;
+                const papa = document.getElementById('score-papa');
+                const mama = document.getElementById('score-mama');
+                const sherlock = document.getElementById('score-sherlock');
+                const papaRes = document.getElementById('score-papa-res');
+                const mamaRes = document.getElementById('score-mama-res');
+                const sherlockRes = document.getElementById('score-sherlock-res');
+                if (papa) papa.innerText = s.PAPA;
+                if (mama) mama.innerText = s.MAMA;
+                if (sherlock) sherlock.innerText = s.SHERLOCK;
+                if (papaRes) papaRes.innerText = s.PAPA;
+                if (mamaRes) mamaRes.innerText = s.MAMA;
+                if (sherlockRes) sherlockRes.innerText = s.SHERLOCK;
             },
 
             nav: (screenId) => {
@@ -621,6 +852,10 @@
                 document.getElementById(screenId).classList.add('active');
             }
         };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            App.updateScoreUI();
+        });
     </script>
 </body>
 
