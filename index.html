@@ -455,6 +455,18 @@
                 </div>
             </div>
 
+            <div style="margin-top: 20px; display: flex; align-items: center; justify-content: space-between;">
+                <label style="font-size: 0.8rem; color: var(--sq-teal); letter-spacing: 1px;">DISTANCIA ALEATORIA</label>
+                <span id="distanceDisplay" class="time-display">ALEATORIA</span>
+            </div>
+
+            <div style="margin-top: 10px; text-align: left; font-size: 0.8rem; color: #777;">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input id="fogToggle" type="checkbox" style="transform: scale(1.2);">
+                    Modo Niebla (civiles con palabras distintas relacionadas)
+                </label>
+            </div>
+
             <p style="font-size: 0.8rem; color: #666; margin-top: 30px; line-height: 1.5;">
                 3 Jugadores. 1 Dispositivo.<br>
                 Identidad Clasificada.<br>
@@ -522,9 +534,19 @@
 
         <div class="panel" style="margin-top: 20px;">
             <p style="font-size: 1.1rem;">Debate iniciado.<br>Identifiquen al infiltrado.</p>
-                <button class="btn btn-pink" onclick="App.openGuessPhase()">FINALIZAR VOTACIÓN</button>
+                <button class="btn btn-pink" onclick="App.startVoting()">INICIAR VOTACIÓN</button>
         </div>
     </div>
+
+        <div id="screen-vote" class="screen">
+            <h2>VOTACIÓN</h2>
+            <div class="panel" style="border-color: var(--sq-teal);">
+                <p id="vote-turn" style="font-size: 0.95rem; margin-bottom: 10px;">Turno de voto</p>
+                <p style="font-size: 0.75rem; color: #777; margin-top: -4px;">Elige a quién expulsar.</p>
+                <div id="vote-options" style="display: grid; gap: 10px; margin-top: 15px;"></div>
+                <div style="margin-top: 15px; font-size: 0.75rem; color: #666;">Los demás no deben mirar.</div>
+            </div>
+        </div>
 
         <div id="screen-guess" class="screen">
             <h2>FASE FINAL</h2>
@@ -577,10 +599,10 @@
             </div>
 
             <div style="margin-top: 20px;">
-                <p style="font-size: 0.75rem; color: #888; letter-spacing: 1px; margin-bottom: 8px;">SUMAR PUNTO AL GANADOR</p>
-                <button class="btn" onclick="App.addPoint('PAPA')">+1 PAPÁ</button>
-                <button class="btn" onclick="App.addPoint('MAMA')">+1 MAMÁ</button>
-                <button class="btn" onclick="App.addPoint('SHERLOCK')">+1 SHERLOCK</button>
+                <p style="font-size: 0.75rem; color: #888; letter-spacing: 1px; margin-bottom: 8px;">APLICAR PUNTAJE</p>
+                <button id="score-impostor-btn" class="btn" onclick="App.applyImpostorWin()">IMPOSTOR GANA (+2)</button>
+                <button id="score-civiles-btn" class="btn btn-pink" onclick="App.applyCivilesWin()">CIVILES GANAN (+1 C/U)</button>
+                <div id="score-status" style="font-size: 0.7rem; color: #666; margin-top: 8px;">Se aplica una sola vez por ronda.</div>
             </div>
 
             <div style="margin-top: 18px; padding-top: 12px; border-top: 1px solid #222;">
@@ -592,68 +614,120 @@
                 </div>
             </div>
 
-            <button class="btn" onclick="location.reload()" style="margin-top: 30px;">NUEVA PARTIDA</button>
+            <button class="btn" onclick="App.newRound()" style="margin-top: 30px;">NUEVA PARTIDA</button>
         </div>
     </div>
 
     <script>
-        // --- BASE DE DATOS (PARES RELACIONADOS, NO DEMASIADO IGUALES) ---
-        const DB = [
-            // HOGAR Y COCINA
-            { c: "Sopa", i: "Estofado" },
-            { c: "Galleta", i: "Tostada" },
-            { c: "Microondas", i: "Horno" },
-            { c: "Vaso", i: "Botella" },
-            { c: "Taza", i: "Termo" },
-            { c: "Sal", i: "Azúcar" },
-            { c: "Cuchara", i: "Tenedor" },
-            { c: "Fruta", i: "Verdura" },
-
-            // BAÑO Y LIMPIEZA
-            { c: "Champú", i: "Acondicionador" },
-            { c: "Jabón", i: "Gel de baño" },
-            { c: "Cepillo de dientes", i: "Hilo dental" },
-            { c: "Toalla", i: "Albornoz" },
-            { c: "Lavadora", i: "Secadora" },
-            { c: "Esponja", i: "Trapo" },
-
-            // SALA Y TECNOLOGÍA
-            { c: "Televisor", i: "Proyector" },
-            { c: "Control remoto", i: "Celular" },
-            { c: "Lámpara", i: "Linterna" },
-            { c: "Videojuego", i: "Película" },
-            { c: "Audífonos", i: "Parlante" },
-
-            // ESCUELA Y OFICINA
-            { c: "Lápiz", i: "Lapicero" },
-            { c: "Cuaderno", i: "Libro" },
-            { c: "Tijeras", i: "Cúter" },
-            { c: "Pizarra", i: "Papelógrafo" },
-
-            // NATURALEZA
-            { c: "Sol", i: "Luna" },
-            { c: "Río", i: "Lago" },
-            { c: "Bosque", i: "Selva" },
-            { c: "Montaña", i: "Colina" },
-            { c: "Mariposa", i: "Libélula" },
-
-            // ANIMALES
-            { c: "Perro", i: "Lobo" },
-            { c: "Gato", i: "Zorro" },
-            { c: "Pájaro", i: "Murciélago" },
-            { c: "Pez", i: "Delfín" },
-
-            // TRANSPORTE
-            { c: "Carro", i: "Bus" },
-            { c: "Bicicleta", i: "Patineta" },
-            { c: "Avión", i: "Helicóptero" },
-            { c: "Barco", i: "Submarino" },
-
-            // TIEMPO Y EVENTOS
-            { c: "Cumpleaños", i: "Fiesta" },
-            { c: "Navidad", i: "Año Nuevo" },
-            { c: "Mañana", i: "Noche" }
-        ];
+        // --- BANCO POR DISTANCIA ---
+        const WORD_BANK = {
+            close: [
+                { trio: ["Sopa", "Estofado", "Caldo"], imp: "Cereal" },
+                { trio: ["Televisor", "Monitor", "Proyector"], imp: "Radio" },
+                { trio: ["Perro", "Lobo", "Zorro"], imp: "Gato" },
+                { trio: ["Lámpara", "Linterna", "Foco"], imp: "Sol" },
+                { trio: ["Barco", "Lancha", "Yate"], imp: "Submarino" },
+                { trio: ["Papel", "Cartón", "Cartulina"], imp: "Plástico" },
+                { trio: ["Camisa", "Camiseta", "Blusa"], imp: "Chaqueta" },
+                { trio: ["Zapato", "Zapatilla", "Botín"], imp: "Sandalia" },
+                { trio: ["Lápiz", "Lapicero", "Pluma"], imp: "Marcador" },
+                { trio: ["Cuaderno", "Agenda", "Libreta"], imp: "Libro" },
+                { trio: ["Plato", "Bandeja", "Fuente"], imp: "Olla" },
+                { trio: ["Vaso", "Taza", "Termo"], imp: "Botella" },
+                { trio: ["Cuchara", "Tenedor", "Cuchillo"], imp: "Espátula" },
+                { trio: ["Azúcar", "Sal", "Harina"], imp: "Pimienta" },
+                { trio: ["Mantequilla", "Margarina", "Aceite"], imp: "Vinagre" },
+                { trio: ["Manzana", "Pera", "Durazno"], imp: "Tomate" },
+                { trio: ["Coche", "Auto", "Carro"], imp: "Moto" },
+                { trio: ["Bicicleta", "Patineta", "Scooter"], imp: "Patines" },
+                { trio: ["Silla", "Sofá", "Sillón"], imp: "Cama" },
+                { trio: ["Mesa", "Escritorio", "Mostrador"], imp: "Estante" },
+                { trio: ["Ventana", "Puerta", "Pared"], imp: "Techo" },
+                { trio: ["Reloj", "Cronómetro", "Alarma"], imp: "Calendario" },
+                { trio: ["Guitarra", "Ukelele", "Bajo"], imp: "Piano" },
+                { trio: ["Pelota", "Balón", "Bola"], imp: "Disco" },
+                { trio: ["Calcetín", "Media", "Panty"], imp: "Guante" },
+                { trio: ["Cajón", "Caja", "Baúl"], imp: "Bolsa" },
+                { trio: ["Limpieza", "Aseo", "Higiene"], imp: "Cocina" },
+                { trio: ["Leche", "Yogur", "Queso"], imp: "Helado" },
+                { trio: ["Pan", "Bollito", "Baguette"], imp: "Galleta" },
+                { trio: ["Nube", "Niebla", "Bruma"], imp: "Humo" },
+                { trio: ["Río", "Lago", "Laguna"], imp: "Mar" },
+                { trio: ["Tigre", "León", "Pantera"], imp: "Gato" },
+                { trio: ["Camión", "Bus", "Furgón"], imp: "Tren" },
+                { trio: ["Gorra", "Sombrero", "Boina"], imp: "Casco" }
+            ],
+            mid: [
+                { trio: ["Río", "Lago", "Cascada"], imp: "Mar" },
+                { trio: ["Taza", "Vaso", "Botella"], imp: "Termo" },
+                { trio: ["Cuaderno", "Libro", "Revista"], imp: "Papel" },
+                { trio: ["Champú", "Acondicionador", "Jabón"], imp: "Perfume" },
+                { trio: ["Bosque", "Selva", "Jardín"], imp: "Parque" },
+                { trio: ["Montaña", "Colina", "Valle"], imp: "Playa" },
+                { trio: ["Avión", "Helicóptero", "Globo"], imp: "Tren" },
+                { trio: ["Cumpleaños", "Fiesta", "Aniversario"], imp: "Graduación" },
+                { trio: ["Pizarra", "Marcador", "Borrador"], imp: "Computadora" },
+                { trio: ["Ajedrez", "Damas", "Dominó"], imp: "Cartas" },
+                { trio: ["Película", "Serie", "Documental"], imp: "Noticiero" },
+                { trio: ["Helado", "Postre", "Pastel"], imp: "Ensalada" },
+                { trio: ["Camiseta", "Pantalón", "Falda"], imp: "Chaqueta" },
+                { trio: ["Llave", "Candado", "Cerrojo"], imp: "Timbre" },
+                { trio: ["Ojo", "Nariz", "Boca"], imp: "Oreja" },
+                { trio: ["Pintura", "Dibujo", "Foto"], imp: "Escultura" },
+                { trio: ["Cine", "Teatro", "Circo"], imp: "Museo" },
+                { trio: ["Nube", "Lluvia", "Trueno"], imp: "Viento" },
+                { trio: ["Mariposa", "Libélula", "Abeja"], imp: "Hormiga" },
+                { trio: ["Pato", "Gallina", "Ganso"], imp: "Pavo" },
+                { trio: ["Semáforo", "Señal", "Radar"], imp: "Parquímetro" },
+                { trio: ["Batería", "Guitarra", "Teclado"], imp: "Flauta" },
+                { trio: ["Paraguas", "Abrigo", "Bufanda"], imp: "Sombrilla" },
+                { trio: ["Panadería", "Cafetería", "Restaurante"], imp: "Supermercado" },
+                { trio: ["Doctor", "Enfermera", "Farmacia"], imp: "Dentista" },
+                { trio: ["Pez", "Delfín", "Ballena"], imp: "Tiburón" },
+                { trio: ["Arena", "Playa", "Ola"], imp: "Río" },
+                { trio: ["Computadora", "Tableta", "Celular"], imp: "Televisor" },
+                { trio: ["Sopa", "Arroz", "Pasta"], imp: "Pizza" },
+                { trio: ["Caramelo", "Chocolate", "Dulce"], imp: "Salado" },
+                { trio: ["Llanta", "Freno", "Volante"], imp: "Motor" },
+                { trio: ["Cinturón", "Corbata", "Bufanda"], imp: "Sombrero" },
+                { trio: ["Arena", "Piedra", "Tierra"], imp: "Nieve" }
+            ],
+            far: [
+                { trio: ["Desierto", "Arena", "Duna"], imp: "Glaciar" },
+                { trio: ["Isla", "Playita", "Bahía"], imp: "Montaña" },
+                { trio: ["Ciudad", "Pueblo", "Barrio"], imp: "Selva" },
+                { trio: ["Luna", "Estrella", "Planeta"], imp: "Oceáno" },
+                { trio: ["Robot", "Cable", "Batería"], imp: "Árbol" },
+                { trio: ["Biblioteca", "Libro", "Lectura"], imp: "Deporte" },
+                { trio: ["Cocina", "Receta", "Sartén"], imp: "Jardín" },
+                { trio: ["Rayo", "Trueno", "Tormenta"], imp: "Arcoíris" },
+                { trio: ["Hospital", "Ambulancia", "Urgencias"], imp: "Escuela" },
+                { trio: ["Fútbol", "Baloncesto", "Tenis"], imp: "Pintura" },
+                { trio: ["Carretera", "Puente", "Túnel"], imp: "Barco" },
+                { trio: ["Selva", "Fauna", "Árboles"], imp: "Ciudad" },
+                { trio: ["Congelado", "Hielo", "Nieve"], imp: "Volcán" },
+                { trio: ["Guitarra", "Música", "Concierto"], imp: "Silencio" },
+                { trio: ["Pelota", "Deporte", "Cancha"], imp: "Teatro" },
+                { trio: ["Computadora", "Internet", "Teclado"], imp: "Bosque" },
+                { trio: ["Pintura", "Lienzo", "Brocha"], imp: "Astronomía" },
+                { trio: ["Tren", "Riel", "Estación"], imp: "Avión" },
+                { trio: ["Café", "Taza", "Desayuno"], imp: "Cena" },
+                { trio: ["Niño", "Juguete", "Parque"], imp: "Oficina" },
+                { trio: ["Pez", "Acuario", "Agua"], imp: "Montaña" },
+                { trio: ["Zapato", "Piso", "Caminar"], imp: "Volar" },
+                { trio: ["Reloj", "Hora", "Minuto"], imp: "Mapa" },
+                { trio: ["Helado", "Frío", "Verano"], imp: "Invierno" },
+                { trio: ["Lápiz", "Dibujo", "Cuaderno"], imp: "Cocina" },
+                { trio: ["Playa", "Sol", "Sombrilla"], imp: "Nieve" },
+                { trio: ["Semilla", "Planta", "Maceta"], imp: "Robótica" },
+                { trio: ["Bicicleta", "Casco", "Parque"], imp: "Playa" },
+                { trio: ["Río", "Puente", "Orilla"], imp: "Desierto" },
+                { trio: ["Pan", "Masa", "Horno"], imp: "Motor" },
+                { trio: ["Luz", "Sombra", "Brillo"], imp: "Ruido" },
+                { trio: ["Ventana", "Vista", "Paisaje"], imp: "Submarino" },
+                { trio: ["Lluvia", "Paraguas", "Charco"], imp: "Arena" }
+            ]
+        };
 
         // --- LÓGICA DEL JUEGO ---
         const App = {
@@ -665,7 +739,11 @@
                 pair: null,
                 outcome: null,
                 outcomeSub: null,
-                scores: { PAPA: 0, MAMA: 0, SHERLOCK: 0 }
+                scores: { PAPA: 0, MAMA: 0, SHERLOCK: 0 },
+                scoreApplied: false,
+                turnOrder: [],
+                voteIndex: 0,
+                votes: {}
             },
 
             updateTimeLabel: (val) => {
@@ -674,18 +752,39 @@
             },
 
             initGame: () => {
-                const pair = DB[Math.floor(Math.random() * DB.length)];
-                App.state.pair = pair;
+                const distanceKeys = ['close', 'mid', 'far'];
+                const distanceKey = distanceKeys[Math.floor(Math.random() * distanceKeys.length)];
+                const distanceLabelMap = { close: 'CERCANA', mid: 'MEDIA', far: 'LEJANA' };
+                const distanceLabel = distanceLabelMap[distanceKey] || 'MEDIA';
+                const distanceEl = document.getElementById('distanceDisplay');
+                if (distanceEl) distanceEl.innerText = distanceLabel;
+                const isFog = document.getElementById('fogToggle')?.checked;
+                const bank = WORD_BANK[distanceKey];
+                const pick = bank[Math.floor(Math.random() * bank.length)];
+                App.state.pair = pick;
+                App.state.scoreApplied = false;
+                App.state.votes = {};
+                App.state.voteIndex = 0;
                 const names = [
                     { key: "PAPA", label: "PAPÁ" },
                     { key: "MAMA", label: "MAMÁ" },
                     { key: "SHERLOCK", label: "SHERLOCK" }
                 ];
-                let rawRoles = [
-                    { type: 'impostor', word: pair.i },
-                    { type: 'civil', word: pair.c },
-                    { type: 'civil', word: pair.c }
-                ];
+                let rawRoles = [];
+                if (isFog) {
+                    const trio = App.shuffle([...pick.trio]);
+                    rawRoles = [
+                        { type: 'impostor', word: pick.imp },
+                        { type: 'civil', word: trio[0] },
+                        { type: 'civil', word: trio[1] }
+                    ];
+                } else {
+                    rawRoles = [
+                        { type: 'impostor', word: pick.imp },
+                        { type: 'civil', word: pick.trio[0] },
+                        { type: 'civil', word: pick.trio[0] }
+                    ];
+                }
                 // Shuffle Fisher-Yates
                 for (let i = rawRoles.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
@@ -697,19 +796,21 @@
                     nameKey: names[idx].key,
                     nameLabel: names[idx].label
                 }));
+                App.state.turnOrder = App.shuffle([...App.state.players]);
                 App.state.turn = 0;
                 App.nav('screen-handover');
                 App.updateHandover();
+                App.updateScoreUI();
             },
 
             updateHandover: () => {
-                const player = App.state.players[App.state.turn];
+                const player = App.state.turnOrder[App.state.turn];
                 document.getElementById('handover-num').innerText = player.id.toString().padStart(2, '0');
                 document.getElementById('handover-name').innerText = player.nameLabel;
             },
 
             prepareReveal: () => {
-                const player = App.state.players[App.state.turn];
+                const player = App.state.turnOrder[App.state.turn];
                 const secureBox = document.getElementById('secure-box');
                 const roleTitleEl = document.getElementById('secret-role-title');
                 const wordEl = document.getElementById('secret-word');
@@ -739,6 +840,42 @@
                     App.nav('screen-handover');
                 } else {
                     App.startGame();
+                }
+            },
+
+            startVoting: () => {
+                App.state.voteIndex = 0;
+                App.state.votes = {};
+                App.renderVoteScreen();
+                App.nav('screen-vote');
+            },
+
+            renderVoteScreen: () => {
+                const voter = App.state.turnOrder[App.state.voteIndex];
+                const turnEl = document.getElementById('vote-turn');
+                const optionsEl = document.getElementById('vote-options');
+                if (turnEl) turnEl.innerText = `Vota: ${voter.nameLabel}`;
+                if (optionsEl) {
+                    optionsEl.innerHTML = '';
+                    App.state.players
+                        .filter(p => p.nameKey !== voter.nameKey)
+                        .forEach(target => {
+                            const btn = document.createElement('button');
+                            btn.className = 'btn';
+                            btn.innerText = target.nameLabel;
+                            btn.onclick = () => App.castVote(voter.nameKey, target.nameKey);
+                            optionsEl.appendChild(btn);
+                        });
+                }
+            },
+
+            castVote: (voterKey, targetKey) => {
+                App.state.votes[voterKey] = targetKey;
+                App.state.voteIndex++;
+                if (App.state.voteIndex < 3) {
+                    App.renderVoteScreen();
+                } else {
+                    App.openGuessPhase();
                 }
             },
 
@@ -825,10 +962,30 @@
                 App.nav('screen-result');
             },
 
-            addPoint: (playerKey) => {
-                if (!App.state.scores[playerKey] && App.state.scores[playerKey] !== 0) return;
-                App.state.scores[playerKey] += 1;
+            applyImpostorWin: () => {
+                if (App.state.scoreApplied) return;
+                const impostor = App.state.players.find(p => p.type === 'impostor');
+                if (!impostor) return;
+                App.state.scores[impostor.nameKey] += 2;
+                App.state.scoreApplied = true;
                 App.updateScoreUI();
+            },
+
+            applyCivilesWin: () => {
+                if (App.state.scoreApplied) return;
+                const civils = App.state.players.filter(p => p.type === 'civil');
+                civils.forEach(c => {
+                    App.state.scores[c.nameKey] += 1;
+                });
+                App.state.scoreApplied = true;
+                App.updateScoreUI();
+            },
+
+            newRound: () => {
+                clearInterval(App.state.timerInterval);
+                App.state.outcome = null;
+                App.state.outcomeSub = null;
+                App.nav('screen-home');
             },
 
             updateScoreUI: () => {
@@ -839,12 +996,28 @@
                 const papaRes = document.getElementById('score-papa-res');
                 const mamaRes = document.getElementById('score-mama-res');
                 const sherlockRes = document.getElementById('score-sherlock-res');
+                const impostorBtn = document.getElementById('score-impostor-btn');
+                const civilesBtn = document.getElementById('score-civiles-btn');
+                const status = document.getElementById('score-status');
                 if (papa) papa.innerText = s.PAPA;
                 if (mama) mama.innerText = s.MAMA;
                 if (sherlock) sherlock.innerText = s.SHERLOCK;
                 if (papaRes) papaRes.innerText = s.PAPA;
                 if (mamaRes) mamaRes.innerText = s.MAMA;
                 if (sherlockRes) sherlockRes.innerText = s.SHERLOCK;
+                if (impostorBtn) impostorBtn.disabled = App.state.scoreApplied;
+                if (civilesBtn) civilesBtn.disabled = App.state.scoreApplied;
+                if (status) status.innerText = App.state.scoreApplied
+                    ? 'Puntaje aplicado para esta ronda.'
+                    : 'Se aplica una sola vez por ronda.';
+            },
+
+            shuffle: (arr) => {
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+                return arr;
             },
 
             nav: (screenId) => {
